@@ -1,0 +1,73 @@
+﻿@{
+    ViewData["Title"] = "Office";
+}
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+
+<h1>Welcome to your private office!</h1>
+<p>Здарова, @ViewData["name"]!</p>
+
+<form method="post" asp-action="Office" asp-controller="Office">
+    <p>Напиши кому-нибудь</p>
+    <div class="">
+        <label class="control-label">Кому:</label>
+        <input asp-for="To" class="form-control" name="To" />
+        <br />
+        <label class="control-label">Заголовок:</label>
+        <input asp-for="Title" class="form-control" name="Title" />
+        <br />
+        <label class="control-label">Текст:</label>
+<textarea asp-for="Text" class="form-control" name="Text">
+</textarea>
+        <br />
+        <button type="submit">Send</button>
+        @ViewData["Message"]
+    </div>
+</form>
+
+<form method="get" asp-action="Office" asp-controller="Office">
+    <label class="control-label">Фильтровать</label>
+    <input type="checkbox" name="Status" asp-for="Status" />
+    <button type="submit">Сохранить</button>
+</form>
+
+<table class="table">
+    <tr><th>Тема</th><th>Дата</th><th>От</th></tr>
+    @if (Model != null)
+    {
+        @foreach (var item in Model)
+        {
+            <tr class="@(item.Status == true ? "seen-true" : "seen-false")">
+                <td>
+                    <a href="#" data-id="@item.Id" onClick='alert("@item.Text")'>@item.Title</a>
+                </td>
+                <td>@item.Date</td>
+                <td>@item.From</td>
+            </tr>
+        }
+    }
+</table>
+
+<script>
+    $(document).ready(function () {
+        let unreadLines = document.querySelectorAll(".seen-false");
+        for (let i = 0; i < unreadLines.length; i++) {
+            unreadLines[i].style.background = 'yellow';
+        }
+
+        let readLines = document.querySelectorAll(".seen-true");
+        for (let i = 0; i < readLines.length; i++) {
+            readLines[i].style.background = 'white';
+        }
+
+        $('table a').click(function (e) {
+            e.preventDefault();
+            var messageId = $(this).attr('data-id');
+            console.log(messageId);
+            $.post('/Office/MarkAsRead/' + messageId, function () {
+                $(this).closest('tr').removeClass('seen-false').addClass('seen-true').css('background-color', 'white');
+            }.bind(this));
+        });
+    });
+</script>
